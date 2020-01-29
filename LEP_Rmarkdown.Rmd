@@ -1,0 +1,193 @@
+---
+title: "LEP"
+author: "SJTW"
+date: "1/29/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache =TRUE)
+```
+
+## Figure 1
+
+
+```{r}
+require(ggplot2)
+require(data.table)
+
+load("~/mic_heat2")
+mic_heat2
+misizzle.2 <- melt(mic_heat2)
+
+misizzle.2$cultureID <- factor(misizzle.2$cultureID, levels = rev(c("PAO1_ILL", "PAO1_ILL(6)", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T13")), ordered = TRUE)
+
+pzol2 <- ggplot(misizzle.2, aes(variable, cultureID)) + geom_tile(aes(fill = value), colour="black") + scale_fill_gradient2(low="#330033", mid="white", high ="darkred", space = "Lab") + theme_bw()
+
+pzol2
+```
+
+
+## Figure 2
+
+```{r}
+load(file = "~/JGR")
+JGR
+GR_PL<- ggplot(JGR, aes(x=Zclass, y=auc_l))+ theme_classic() + 
+  geom_jitter(aes(fill = Zclass, shape=Zclass), width = 0.3, size=3, height = 0.25)+ scale_shape_manual(values=c(24,3,23,21))+
+  scale_fill_manual(values = c("pink4","black","palegreen1","dodgerblue3")) + 
+  labs(x="", y="Area Under Curve (AUC)") + scale_x_discrete(limits=c("Control", "CIP", "MER", "TOB"))+
+  scale_y_continuous(limits = c(0,1400), breaks=c(0,200,400,600,800,1000,1200,1400), labels = c(0,200,400,600,800,1000,1200,1400))
+
+GR_PL
+
+```
+
+##Figure 3
+
+```{r}
+load("~/provean_newrun")
+provean_newrun
+provean_plot <- ggplot(provean_newrun, aes(x=TYPE, y=PROVEAN))+ theme_classic() +
+  geom_jitter(aes(fill=TYPE), shape=21, size=2)+ geom_boxplot(outlier.shape = NA)+ 
+  geom_hline(yintercept = c(-2.5), linetype="longdash", colour="red", size=1)
+provean_plot
+
+provean.aov <- aov(PROVEAN ~ TYPE, data=provean_newrun)
+provean.aov_cor <- TukeyHSD(provean.aov, p.adjust="bonferroni")
+provean.aov_cor$TYPE[,"p adj"]
+
+```
+
+## Supplementary figure 1
+
+Adobe Illustrator artwork - no code used
+
+## Supplementary figure 2
+
+```{r}
+require(Rmisc)
+require(egg)
+
+load("~/pXz01")
+load("~/pd")
+pXz01
+tt00 <- summarySE(pXz01, measurevar="abs", groupvars=c("time", "strain"))
+tt00$strain <- factor(tt00$strain, levels = c('T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12','T13','PAO'))
+pltX <- ggplot(tt00, aes(x=time, y=abs, group=strain, colour=strain)) + theme_classic() + geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
+pltX
+
+load("~/mXz01")
+mXz01
+mm00 <- summarySE(mXz01, measurevar="abs", groupvars=c("time", "strain"))
+mm00$strain <- factor(mm00$strain, levels = c('M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12','M13','PAO'))
+pltY <- ggplot(mm00, aes(x=time, y=abs, group=strain, colour=strain)) + theme_classic()+ geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
+pltY
+
+load("~/cXz01")
+cXz01
+cc00 <- summarySE(cXz01, measurevar="abs", groupvars=c("time", "Strain"))
+cc00$Strain <- factor(cc00$Strain, levels = c('C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13','PAO'))
+pltZ <- ggplot(cc00, aes(x=time, y=abs, group=Strain, colour=Strain)) + theme_classic()+ geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
+pltZ
+
+combined_growth_plotXYZ <- ggarrange(pltX,pltY,pltZ, ncol = 1)
+```
+
+##Supplementary Figure 3
+
+```{r}
+require(multcomp)
+require(egg)
+
+load("~/tob123")
+tob123
+T123_PL<- ggplot(tob123, aes(x=line, y=auc_l))+ theme_classic() + 
+  geom_point(shape =21, fill="dodgerblue", size=2.2)+ labs(x="", y="Area Under Curve (AUC)")+
+  scale_y_continuous(limits = c(0,1400), breaks=c(0,200,400,600,800,1000,1200,1400), labels = c(0,200,400,600,800,1000,1200,1400)) + scale_x_discrete(limits=c("T1", "T2",  "T3",  "T4",  "T5",  "T6",  "T7",  "T8",  "T9", "T10", "T11", "T12", "T13", "PAO"))
+T123_PL
+
+T123.aov <- aov(auc_l ~ line, data=tob123)
+test.tob123 = glht(T123.aov, linfct = mcp(line = "Dunnett"))
+summary(test.tob123, test=adjusted("bonferroni"))
+
+load("~/mero123")
+mero123
+M123_PL <- ggplot(mero123, aes(x=line, y=auc_l))+ theme_classic() + 
+  geom_point(shape =23, fill="palegreen1", size=2.2)+ labs(x="", y="Area Under Curve (AUC)")+
+  scale_y_continuous(limits = c(0,1400), breaks=c(0,200,400,600,800,1000,1200,1400), labels = c(0,200,400,600,800,1000,1200,1400)) + scale_x_discrete(limits=c("M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "PAO"))
+M123_PL
+
+M123.aov <- aov(auc_l ~ line, data=mero123)
+test.mer123 = glht(M123.aov, linfct = mcp(line= "Dunnett"))
+summary(test.mer123, test=adjusted("bonferroni"))
+
+load("~/cipr123")
+cipr123
+C123_PL <- ggplot(cipr123, aes(x=group, y=auc_l))+ theme_classic() + 
+  geom_point(shape =24, fill="pink4", size=2.2)+ labs(x="", y="Area Under Curve (AUC)")+
+  scale_y_continuous(limits = c(0,1400), breaks=c(0,200,400,600,800,1000,1200,1400), labels = c(0,200,400,600,800,1000,1200,1400)) + scale_x_discrete(limits=c("C1", "C2",  "C3",  "C4",  "C5",  "C6",  "C7",  "C8",  "C9", "C10", "C11", "C12", "C13", "PAO"))
+C123_PL
+
+C123.aov <- aov(auc_l ~ group, data=cipr123)
+test.cip123 = glht(C123.aov, linfct = mcp(group = "Dunnett"))
+summary(test.cip123, test=adjusted("bonferroni"))
+
+ggarrange(C123_PL,M123_PL,T123_PL, ncol=1)
+
+```
+
+
+
+##Supplementary Figure 4
+
+BRIG figure - See other codes
+
+##Supplementary Figure 5
+
+Files are large so only PAO1 is included as an example here (the others are commented out).
+
+```{r}
+require(CNOGpro)
+
+#importing files 
+#PAO1_CNOG <- CNOGpro(hitsfile = "PAO1.hits", gbkfile = "PAO1.gbff", windowlength = 100, name = "P.aeruginosa M1")
+load("~/PAO1_CNOG")
+PAO1_CNOG
+PAO1_CNOG_NORM <- normalizeGC(PAO1_CNOG)
+PAO1_CNOG_BS <- runBootstrap(PAO1_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
+PAO1_CNOG_HMM <- runHMM(PAO1_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
+plotCNOGpro(PAO1_CNOG_HMM)
+
+#importing files
+#TE_CNOG <- CNOGpro(hitsfile = "TE.hits", gbkfile = "PAO1.gbff", windowlength = 100, name = "P.aeruginosa M1")
+#TE_CNOG_NORM <- normalizeGC(TE_CNOG)
+#TE_CNOG_BS <- runBootstrap(TE_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
+#TE_CNOG_HMM <- runHMM(TE_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
+#plotCNOGpro(TE_CNOG_HMM)
+
+#importing files
+#TK_CNOG <- CNOGpro(hitsfile = "TK.hits", gbkfile = "PAO1.gbff", windowlength = 100, name = "P.aeruginosa M1")
+#TK_CNOG_NORM <- normalizeGC(TK_CNOG)
+#TK_CNOG_BS <- runBootstrap(TK_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
+#TK_CNOG_HMM <- runHMM(TK_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
+#plotCNOGpro(TK_CNOG_HMM)
+
+#importing files
+#M12_CNOG <- CNOGpro(hitsfile = "M12.hits", gbkfile = "PAO1.gbff", windowlength = 100, name = "P.aeruginosa M1")
+#M12_CNOG_NORM <- normalizeGC(M12_CNOG)
+#M12_CNOG_BS <- runBootstrap(M12_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
+#M12_CNOG_HMM <- runHMM(M12_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
+#plotCNOGpro(M12_CNOG_HMM)
+
+```
+
+
+##Supplementary Figure 6
+
+BRIG figure - See other codes
+
+
