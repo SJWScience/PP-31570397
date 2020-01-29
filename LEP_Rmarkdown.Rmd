@@ -156,9 +156,9 @@ BRIG figure - See other codes
 
 ##Supplementary Figure 5
 
-Files are large so only PAO1 is included as an example here (the others are commented out).
+Files are large so only PAO1 and M1 is incuded as an example here (the other two are commented out).
 
-These figures serve to show copy number variation across some of the experimentally evolved isolates. A "hits" file was generated from BAM files of the mutant mapped onto P.aeruginosa PAO1 (the documentation for CNOGpro details how this is done). Those hits files were loading into R using the PAO1.gbff file from RefSeq as a reference and used a window length of 100 (takes the mean read number across 100bp frames to reduce computing time and artifacts from reducing window size too small). A series of normalizations are then carried out to make sure the data can be compared across isolates and bootstrapped for 1000 replicates to give higher confidence in results. Originally we used 3 possible states of copy number (0 (doesnt count),1,2,3). There is regions in the PAO1 genome found in higher copy than this, however too many states makes the results harder to determine a true duplication from an artifact introduced from including too many possible copy number states (3 was the best for this data, other data and longer read data might benefit from more states)
+These figures serve to show copy number variation across some of the experimentally evolved isolates. A "hits" file was generated from BAM files of the mutant mapped onto P.aeruginosa PAO1 (the documentation for CNOGpro details how this is done). Those hits files were loading into R using the PAO1.gbff file from RefSeq as a reference and used a window length of 100 (takes the mean read number across 100bp frames to reduce computing time and artifacts from reducing window size too small). A series of normalizations are then carried out to make sure the data can be compared across isolates and bootstrapped for 1000 replicates to give higher confidence in results. Originally we used 3 possible states of copy number (0 (doesnt count),1,2,3). There is regions in the PAO1 genome found in higher copy than this, however too many states makes the results harder to determine a true duplication from an artifact introduced from including too many possible copy number states (3 was the best for this data, other data and longer read data might benefit from more states), this can be seen in the read count distribution figures
 
 ```{r}
 require(CNOGpro)
@@ -188,10 +188,11 @@ plotCNOGpro(PAO1_CNOG_HMM)
 
 #importing files
 #M12_CNOG <- CNOGpro(hitsfile = "M12.hits", gbkfile = "PAO1.gbff", windowlength = 100, name = "P.aeruginosa M1")
-#M12_CNOG_NORM <- normalizeGC(M12_CNOG)
-#M12_CNOG_BS <- runBootstrap(M12_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
-#M12_CNOG_HMM <- runHMM(M12_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
-#plotCNOGpro(M12_CNOG_HMM)
+load("~/M12_CNOG")
+M12_CNOG_NORM <- normalizeGC(M12_CNOG)
+M12_CNOG_BS <- runBootstrap(M12_CNOG_NORM, replicates = 1000, quantiles = c(0.025, 0.975))
+M12_CNOG_HMM <- runHMM(M12_CNOG_BS, nstates = 3, changeprob = 1e-05, includeZeroState = T, errorRate = 0.01)
+plotCNOGpro(M12_CNOG_HMM)
 
 ```
 
