@@ -14,6 +14,9 @@ knitr::opts_chunk$set(cache =TRUE)
 
 ## Figure 1
 
+Figure 1 is a heatmap showing the resistances of the experimentally evolved isolates. Data used was a log2 transformation of the MIC of the resistant mutants relative to the starter strain P.aeruginosa PAO1. Due to the MIC testing going up in a doubling concentration, using a log2 normalization provided the best resolution and distribution of the data. 
+
+Raw MIC values were added to the heatmap using Adobe Illustrator, and labels were shifted to ensure high clarity in the final figue.
 
 ```{r}
 require(ggplot2)
@@ -33,6 +36,8 @@ pzol2
 
 ## Figure 2
 
+This figure shows the differences in Area Under growth Curve (AUC) computed from OD600 measurements of shaking cultures in a 96-well plate incubated at 37 degrees celcius for 18 hours, measurements were taken every 30 minutes. The raw output from the pate-reader was transposed (transpose function) in excel and then AUC was computed using "GrowthCurver" in R. Data from all plates was combined and averages across replicates were obtained. The logistical AUC was used from GrowthCurver for this figure
+
 ```{r}
 load(file = "~/JGR")
 JGR
@@ -47,6 +52,8 @@ GR_PL
 ```
 
 ##Figure 3
+
+This figure takes the predicted provean values for each variant identified against the panel of clinical and environmental genomes. Each variant is only listed a maximum of once per condition (clinical or environmental) to stop biasing different database sizes and to prevent bias from commonly occuring variants. Each variant was listed with its corresponding gene, antibiotic associated with resistance and a second associated resistance (if applicable) and finally a classification of environmental or clinical. Statistics were done on the raw provean scores against the type (environmental or clinical) and was an anova with Tukey correction.
 
 ```{r}
 load("~/provean_newrun")
@@ -68,6 +75,8 @@ Adobe Illustrator artwork - no code used
 
 ## Supplementary figure 2
 
+This figure shows the raw absorbance (OD600) values over 18 hours for each mutant. Line weights were increased in Adobe Illustrator, and PAO1 was changed to black to contrast it more clearly per antibiotic.
+
 ```{r}
 require(Rmisc)
 require(egg)
@@ -78,26 +87,25 @@ pXz01
 tt00 <- summarySE(pXz01, measurevar="abs", groupvars=c("time", "strain"))
 tt00$strain <- factor(tt00$strain, levels = c('T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12','T13','PAO'))
 pltX <- ggplot(tt00, aes(x=time, y=abs, group=strain, colour=strain)) + theme_classic() + geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
-pltX
 
 load("~/mXz01")
 mXz01
 mm00 <- summarySE(mXz01, measurevar="abs", groupvars=c("time", "strain"))
 mm00$strain <- factor(mm00$strain, levels = c('M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12','M13','PAO'))
 pltY <- ggplot(mm00, aes(x=time, y=abs, group=strain, colour=strain)) + theme_classic()+ geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
-pltY
 
 load("~/cXz01")
 cXz01
 cc00 <- summarySE(cXz01, measurevar="abs", groupvars=c("time", "Strain"))
 cc00$Strain <- factor(cc00$Strain, levels = c('C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13','PAO'))
 pltZ <- ggplot(cc00, aes(x=time, y=abs, group=Strain, colour=Strain)) + theme_classic()+ geom_line(position=pd, size=1) + geom_errorbar(aes(ymin=abs-se, ymax=abs+se), width=.1, position=pd) + geom_point(position=pd, shape=21, colour="black") + scale_x_continuous(breaks=c(0,2,4,6,8,10,12,14,16,18)) + labs(x="Time (h)", y="Absorbance 600nm") + guides(col=guide_legend(ncol = 2))
-pltZ
 
 combined_growth_plotXYZ <- ggarrange(pltX,pltY,pltZ, ncol = 1)
 ```
 
 ##Supplementary Figure 3
+
+This figure is the associated AUC values from each replicate of each growth curve from supplementary figure 2. The average of each sample is the value used in Figure 2, in the main text. A anova with post-hoc dunnett test was used for each antibiotic relative to PAO1 AUC to determine statistical significance
 
 ```{r}
 require(multcomp)
@@ -149,6 +157,8 @@ BRIG figure - See other codes
 ##Supplementary Figure 5
 
 Files are large so only PAO1 is included as an example here (the others are commented out).
+
+These figures serve to show copy number variation across some of the experimentally evolved isolates. A "hits" file was generated from BAM files of the mutant mapped onto P.aeruginosa PAO1 (the documentation for CNOGpro details how this is done). Those hits files were loading into R using the PAO1.gbff file from RefSeq as a reference and used a window length of 100 (takes the mean read number across 100bp frames to reduce computing time and artifacts from reducing window size too small). A series of normalizations are then carried out to make sure the data can be compared across isolates and bootstrapped for 1000 replicates to give higher confidence in results. Originally we used 3 possible states of copy number (0 (doesnt count),1,2,3). There is regions in the PAO1 genome found in higher copy than this, however too many states makes the results harder to determine a true duplication from an artifact introduced from including too many possible copy number states (3 was the best for this data, other data and longer read data might benefit from more states)
 
 ```{r}
 require(CNOGpro)
